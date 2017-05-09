@@ -3,7 +3,6 @@
 # set -x
 
 
-
 getStreamAddress() {
     local streamAddress
   	local myArray=($(nmap -n -p 8080 -oG - 192.168.1.* | awk '$5 ~ /open/{print $2}'))
@@ -32,8 +31,18 @@ isStreamAlive() {
     return $?
 }
 
-checkVlc() {
-    return 0
+checkVlcIsRunning() {
+    if pgrep -x "vlc" > /dev/null
+    then
+        echo "VLC is already running"
+    else
+        echo "VLC is stopped, restarting it..."
+        vlc --audio-desync=-10000 http://$1:8080/video &
+    fi
+}
+
+killVlcInstances() {
+    pkill -15 vlc | pkill -9 vlc
 }
 
 ipAddress="---"
@@ -52,11 +61,12 @@ do
             isStreaming=1
             echo "start streaming from $ipAddress..."
         else
-            echo "no stream found!"
+            echo "no stream found: kill eventual VLC processes"
+            killVlcInstances
         fi
     fi
 
-    sleep 1
+    sleep 2
 
     if [ $isStreaming -eq 1 ]
     then
@@ -65,11 +75,12 @@ do
         if [ $? -eq 0 ]
         then
             # echo "Success at ip $ipAddress"
-            checkVlc
+            checkVlcIsRunning $ipAddress
         else
             echo "no stream at ip $ipAddress"
             isStreaming=0
             echo "stop streaming from $ipAddress..."
+            killVlcInstances
         fi
     fi
 
