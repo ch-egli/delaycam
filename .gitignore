@@ -7,3 +7,5 @@ dist
 *.iml
 *.log
 *.lck
+
+delay.txt
