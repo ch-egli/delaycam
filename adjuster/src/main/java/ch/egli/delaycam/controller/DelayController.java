@@ -24,8 +24,10 @@ import java.util.List;
 public class DelayController {
     private static final Logger LOGGER = LoggerFactory.getLogger(DelayController.class);
 
-    private static Integer MIN_DELAY = 3;
+    private static Integer MIN_DELAY = 5;
     private static Integer MAX_DELAY = 60;
+
+    private static Integer ADJUST_VALUE = 3; // default delay in seconds
 
     @RequestMapping(value="/delay", method= RequestMethod.GET)
     public String getDelay() throws IOException {
@@ -65,11 +67,16 @@ public class DelayController {
             }
 
         }
+
+        result = result / 1000;
+        result = result + ADJUST_VALUE;
         return result;
     }
 
     private void setDelayToFile(Integer delayInSeconds) throws IOException {
-        Files.write(Paths.get("delay.txt"), delayInSeconds.toString().getBytes(Charset.forName("UTF-8")), StandardOpenOption.CREATE);
+        delayInSeconds = delayInSeconds - ADJUST_VALUE;
+        Integer delayInMillis = 1000 * delayInSeconds;
+        Files.write(Paths.get("delay.txt"), delayInMillis.toString().getBytes(Charset.forName("UTF-8")), StandardOpenOption.CREATE);
     }
 
 }

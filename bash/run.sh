@@ -37,7 +37,14 @@ checkVlcIsRunning() {
         echo "VLC is already running"
     else
         echo "VLC is stopped, restarting it..."
-        vlc --audio-desync=-10000 http://$1:8080/video &
+
+        # read delay from file
+        readarray myArray < ../delay.txt
+        delay=${myArray[0]}
+        echo $delay
+
+        myCmd="vlc --audio-desync=-$delay http://$1:8080/video &"
+        eval $myCmd
     fi
 }
 
